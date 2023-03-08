@@ -1,0 +1,52 @@
+version: '3.8'
+
+services:
+
+#development
+  # frontend:
+  #   container_name: frontend
+  #   build: ./Frontend
+  #   command: npm start
+  #   ports:
+  #     - 8081:8081
+  #   depends_on:
+  #     - backend
+  #   restart: unless-stopped
+
+  # backend:
+  #   container_name: backend
+  #   build: ./Backend
+  #   command: npm start
+  #   ports:
+  #     - 5000:5000
+  #   depends_on:
+  #     - mongodb
+  #   restart: always
+
+#production
+  frontend:
+    container_name: frontend
+    image: dockerromix/cloud-project-frontend:latest
+    command: npm start
+    ports:
+      - 8081:8081
+    depends_on:
+      - backend
+    restart: unless-stopped
+
+  backend:
+    container_name: backend
+    image: dockerromix/cloud-project-backend:latest
+    command: npm start
+    ports:
+      - 5000:5000
+    depends_on:
+      - mongodb
+    restart: always
+
+  mongodb:
+    container_name: mongodb
+    image: mongo:latest
+    volumes:
+      - ./db:/data/db
+    restart: unless-stopped
