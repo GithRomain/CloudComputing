@@ -1,52 +1,105 @@
+#This line specifies the version of the Docker Compose file format to use.
 version: '3.8'
 
+#This line specifies the services that make up the application
 services:
 
 #development
-  # frontend:
-  #   container_name: frontend
-  #   build: ./Frontend
-  #   command: npm start
-  #   ports:
-  #     - 8081:8081
-  #   depends_on:
-  #     - backend
-  #   restart: unless-stopped
-
-  # backend:
-  #   container_name: backend
-  #   build: ./Backend
-  #   command: npm start
-  #   ports:
-  #     - 5000:5000
-  #   depends_on:
-  #     - mongodb
-  #   restart: always
-
-#production
+  # This line specifies the services that make up the application
   frontend:
+    #This option specifies the name of the container.
     container_name: frontend
-    image: dockerromix/cloud-project-frontend:latest
+    #This option specifies the directory in which the Dockerfile is located.
+    build: ./Frontend
+    #This option specifies the command to be executed when the container is started.
     command: npm start
+    #This option specifies the volumes to be mounted in the container.
+    volumes:
+      - ./Frontend:/usr/src/frontend
+      - /usr/src/frontend/node_modules
+    #This option specifies the networks to which the container will be connected.
+    networks:
+      - bridge-network
+    #This option specifies the ports to be exposed by the container.
     ports:
       - 8081:8081
+    #This option specifies the services that must be started before the current service.
     depends_on:
       - backend
+    #This option specifies the restart policy for the container.
     restart: unless-stopped
 
+  # This line specifies the services that make up the application
   backend:
+    #This option specifies the name of the container.
     container_name: backend
-    image: dockerromix/cloud-project-backend:latest
+    #This option specifies the directory in which the Dockerfile is located.
+    build: ./Backend
+    #This option specifies the command to be executed when the container is started.
     command: npm start
+    #This option specifies the volumes to be mounted in the container.
+    volumes:
+      - ./Backend:/usr/src/backend
+      - /usr/src/backend/node_modules
+    #This option specifies the networks to which the container will be connected.
+    networks:
+      - bridge-network
+    #This option specifies the ports to be exposed by the container.
     ports:
       - 5000:5000
+    #This option specifies the services that must be started before the current service.
     depends_on:
       - mongodb
+    #This option specifies the restart policy for the container.
     restart: always
 
+  # This line specifies the services that make up the application
   mongodb:
+    #This option specifies the name of the container.
     container_name: mongodb
+    #This option specifies the image to be used to create the container.
     image: mongo:latest
+    #This option specifies the volumes to be mounted in the container.
     volumes:
+      #Mounted
       - ./db:/data/db
+      #Volume
+      #This line defines the name of the volume used to persist the mongoDB data.
+      - configdb:/data/configdb
+    #This option specifies the networks to which the container will be connected.
+    networks:
+      - bridge-network
+    #This option specifies the ports to be exposed by the container.
     restart: unless-stopped
+
+  # This line specifies the services that make up the application
+  mongodb-express:
+    #This option specifies the name of the container.
+    container_name: mongodb-express
+    #This option specifies the image to be used to create the container.
+    image: mongo-express:latest
+    #This option specifies the environment variables to be passed to the container.
+    environment:    
+      ME_CONFIG_MONGODB_SERVER: mongodb
+    #This option specifies the networks to which the container will be connected.
+    networks:
+      - bridge-network
+    #This option specifies the ports to be exposed by the container.
+    ports:
+      - "8080:8081"
+    #This option specifies the services that must be started before the current service.
+    depends_on:
+      - mongodb
+    #This option specifies the restart policy for the container.
+    restart: unless-stopped
+
+#This option specifies the volumes to be mounted in the container.
+volumes:
+  configdb:
+
+#This option specifies the networks to which the container will be connected.
+networks:
+  #This line specifies the name of the network.
+  bridge-network:
+  #This line specifies the driver used to create the network.
+    driver: bridge
